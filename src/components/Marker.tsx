@@ -1,4 +1,4 @@
-import { ReactThreeFiber, useThree } from "@react-three/fiber";
+import { useThree } from "@react-three/fiber";
 import React from "react";
 import * as THREE from "three";
 import * as FreeformControls from "@kineticsystem/three-freeform-controls";
@@ -389,23 +389,27 @@ class ZTranslation extends FreeformControls.TranslationGroup {
   };
 }
 
-export type MarkerProps = ReactThreeFiber.Object3DNode<
-  MarkerImpl,
-  typeof MarkerImpl
-> &
-  JSX.IntrinsicElements["group"] & {
-    object?: THREE.Object3D | React.MutableRefObject<THREE.Object3D>;
-    domElement?: HTMLElement;
-    children?: React.ReactElement<THREE.Object3D>;
-    camera?: THREE.Camera;
-    minRingRadius?: number;
-    ringSize?: number;
-    arrowRadius?: number;
-    arrowLength?: number;
-    onDragStart?: (e?: THREE.Event) => void;
-    onDragStop?: (e?: THREE.Event) => void;
-  };
+/*/////////////////////////////////////////////////////////////////////////////
+ * React Three Fiber Marker.
+ */
 
+export interface MarkerProps {
+  object?: THREE.Object3D | React.MutableRefObject<THREE.Object3D>;
+  domElement?: HTMLElement;
+  children?: React.ReactElement<THREE.Object3D>;
+  camera?: THREE.Camera;
+  minRingRadius?: number;
+  ringSize?: number;
+  arrowRadius?: number;
+  arrowLength?: number;
+  onDragStart?: (e?: THREE.Event) => void;
+  onDragStop?: (e?: THREE.Event) => void;
+}
+
+/**
+ * A "forward ref" component automatically transfer the given ref down to a
+ * subcomponent, in this case a "primitive" component.
+ */
 const Marker = React.forwardRef<MarkerImpl, MarkerProps>(
   (
     { children, domElement, onDragStart, onDragStop, object, ...props },
@@ -450,10 +454,12 @@ const Marker = React.forwardRef<MarkerImpl, MarkerProps>(
       if (object) {
         marker.link(object instanceof THREE.Object3D ? object : object.current);
       } else if (group.current instanceof THREE.Object3D) {
+        console.log(group.current);
         marker.link(group.current);
       }
-    }, [object, children, marker]);
+    }, [marker, object]);
 
+    // Called when a drag operation starts or stops.
     React.useEffect(() => {
       if (onDragStart) {
         marker.listen(FreeformControls.EVENTS.DRAG_START, () => {
