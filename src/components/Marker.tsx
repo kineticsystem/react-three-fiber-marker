@@ -1,7 +1,8 @@
-import { useThree } from "@react-three/fiber";
+import { ReactThreeFiber, useThree } from "@react-three/fiber";
 import React from "react";
 import * as THREE from "three";
 import * as FreeformControls from "@kineticsystem/three-freeform-controls";
+import { Vector3 } from "three";
 
 /**
  * This is a 3D marker to move and rotate an object in the scene.
@@ -66,6 +67,7 @@ export class MarkerImpl extends FreeformControls.ControlsManager {
     controls.setupHandle(new XRotation(this.minRingRadius, this.ringSize));
     controls.setupHandle(new YRotation(this.minRingRadius, this.ringSize));
     controls.setupHandle(new ZRotation(this.minRingRadius, this.ringSize));
+
     return controls;
   };
 }
@@ -393,19 +395,27 @@ class ZTranslation extends FreeformControls.TranslationGroup {
  * React Three Fiber Marker.
  */
 
-export interface MarkerProps {
-  visible?: boolean;
-  camera?: THREE.Camera;
-  object?: THREE.Object3D | React.MutableRefObject<THREE.Object3D>;
-  children?: React.ReactElement<THREE.Object3D>;
-  domElement?: HTMLElement;
-  minRingRadius?: number;
-  ringSize?: number;
-  arrowRadius?: number;
-  arrowLength?: number;
-  onDragStart?: (e?: THREE.Event) => void;
-  onDragStop?: (e?: THREE.Event) => void;
-}
+/**
+ * This type merges all basic properties listed by the type "Object3DNode", all
+ * properties of the "group" element and all properties which are specific to
+ * this component.
+ */
+export type MarkerProps = ReactThreeFiber.Object3DNode<
+  MarkerImpl,
+  typeof MarkerImpl
+> &
+  JSX.IntrinsicElements["group"] & {
+    // Marker properties.
+    camera?: THREE.Camera;
+    object?: THREE.Object3D | React.MutableRefObject<THREE.Object3D>;
+    domElement?: HTMLElement;
+    minRingRadius?: number;
+    ringSize?: number;
+    arrowRadius?: number;
+    arrowLength?: number;
+    onDragStart?: (e?: THREE.Event) => void;
+    onDragStop?: (e?: THREE.Event) => void;
+  };
 
 /**
  * A "forward ref component" automatically transfer the given ref down to a
@@ -423,6 +433,7 @@ const Marker = React.forwardRef<MarkerImpl, MarkerProps>(
       arrowLength = 1.0,
       onDragStart,
       onDragStop,
+      ...rest
     } = props;
 
     // Canvas context properties.
@@ -431,7 +442,11 @@ const Marker = React.forwardRef<MarkerImpl, MarkerProps>(
       gl: { domElement },
     } = useThree();
 
+    // Collect the properties to pass down to the marker component.
     const markerProps = { visible };
+
+    // Collect the properties to pass down to the group of children.
+    const groupProps = { ...rest };
 
     const marker = React.useMemo(
       () =>
@@ -480,7 +495,9 @@ const Marker = React.forwardRef<MarkerImpl, MarkerProps>(
           object={marker}
           {...markerProps}
         />
-        <group ref={group}>{children}</group>
+        <group ref={group} {...groupProps}>
+          {children}
+        </group>
       </>
     ) : null;
   }
