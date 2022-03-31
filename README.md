@@ -1,4 +1,4 @@
-# React Three Fiber Playground
+# React Three Fiber Marker
 
 This is an experiment with React Three Fiber.
 
