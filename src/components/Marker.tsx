@@ -412,18 +412,20 @@ export interface MarkerProps {
  * subcomponent, in this case a "primitive" component.
  */
 const Marker = React.forwardRef<MarkerImpl, MarkerProps>(
-  (
-    { children, domElement, onDragStart, onDragStop, object, ...props },
-    ref
-  ) => {
+  (props: MarkerProps, ref) => {
     // Object destructuring and default properties.
     const {
       visible = true,
       camera,
+      object,
+      children,
+      domElement,
       minRingRadius = 1.0,
       ringSize = 0.6,
       arrowRadius = 0.2,
       arrowLength = 1.0,
+      onDragStart,
+      onDragStop,
     } = props;
 
     const markerProps = { visible };
