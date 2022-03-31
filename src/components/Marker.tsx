@@ -394,15 +394,15 @@ class ZTranslation extends FreeformControls.TranslationGroup {
  */
 
 export interface MarkerProps {
-  object?: THREE.Object3D | React.MutableRefObject<THREE.Object3D>;
-  domElement?: HTMLElement;
-  children?: React.ReactElement<THREE.Object3D>;
+  visible?: boolean;
   camera?: THREE.Camera;
+  object?: THREE.Object3D | React.MutableRefObject<THREE.Object3D>;
+  children?: React.ReactElement<THREE.Object3D>;
+  domElement?: HTMLElement;
   minRingRadius?: number;
   ringSize?: number;
   arrowRadius?: number;
   arrowLength?: number;
-  visible?: boolean;
   onDragStart?: (e?: THREE.Event) => void;
   onDragStop?: (e?: THREE.Event) => void;
 }
@@ -413,13 +413,10 @@ export interface MarkerProps {
  */
 const Marker = React.forwardRef<MarkerImpl, MarkerProps>(
   (props: MarkerProps, ref) => {
-    // Object destructuring and default properties.
     const {
       visible = true,
-      camera,
       object,
       children,
-      domElement,
       minRingRadius = 1.0,
       ringSize = 0.6,
       arrowRadius = 0.2,
@@ -428,34 +425,25 @@ const Marker = React.forwardRef<MarkerImpl, MarkerProps>(
       onDragStop,
     } = props;
 
+    // Canvas context properties.
+    const {
+      camera,
+      gl: { domElement },
+    } = useThree();
+
     const markerProps = { visible };
-
-    const gl = useThree((state) => state.gl);
-
-    // If no camera is provided, use the default one.
-    const defaultCamera = useThree((state) => state.camera);
-    const explCamera = camera || defaultCamera;
-
-    const explDomElement = (domElement || gl.domElement) as HTMLElement;
 
     const marker = React.useMemo(
       () =>
         new MarkerImpl(
-          explCamera,
-          explDomElement,
+          camera,
+          domElement,
           minRingRadius,
           ringSize,
           arrowRadius,
           arrowLength
         ),
-      [
-        explCamera,
-        explDomElement,
-        minRingRadius,
-        ringSize,
-        arrowRadius,
-        arrowLength,
-      ]
+      [camera, domElement, minRingRadius, ringSize, arrowRadius, arrowLength]
     );
 
     const group = React.useRef<THREE.Group>();
