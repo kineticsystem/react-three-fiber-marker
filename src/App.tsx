@@ -1,7 +1,7 @@
 import PulsatingBox from "./components/PulsatingBox";
 import Marker from "./components/Marker";
 
-import React, { useState } from "react";
+import { useState } from "react";
 
 // React-Three fiber.
 import { Canvas } from "@react-three/fiber";

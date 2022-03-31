@@ -2,7 +2,6 @@ import { ReactThreeFiber, useThree } from "@react-three/fiber";
 import React from "react";
 import * as THREE from "three";
 import * as FreeformControls from "@kineticsystem/three-freeform-controls";
-import { Vector3 } from "three";
 
 /**
  * This is a 3D marker to move and rotate an object in the scene.
