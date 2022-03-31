@@ -402,12 +402,13 @@ export interface MarkerProps {
   ringSize?: number;
   arrowRadius?: number;
   arrowLength?: number;
+  visible?: boolean;
   onDragStart?: (e?: THREE.Event) => void;
   onDragStop?: (e?: THREE.Event) => void;
 }
 
 /**
- * A "forward ref" component automatically transfer the given ref down to a
+ * A "forward ref component" automatically transfer the given ref down to a
  * subcomponent, in this case a "primitive" component.
  */
 const Marker = React.forwardRef<MarkerImpl, MarkerProps>(
@@ -415,35 +416,43 @@ const Marker = React.forwardRef<MarkerImpl, MarkerProps>(
     { children, domElement, onDragStart, onDragStop, object, ...props },
     ref
   ) => {
-    const { camera, ...rest } = props;
+    // Object destructuring and default properties.
+    const {
+      visible = true,
+      camera,
+      minRingRadius = 1.0,
+      ringSize = 0.6,
+      arrowRadius = 0.2,
+      arrowLength = 1.0,
+    } = props;
+
+    const markerProps = { visible };
+
     const gl = useThree((state) => state.gl);
-    const events = useThree((state) => state.events);
 
     // If no camera is provided, use the default one.
     const defaultCamera = useThree((state) => state.camera);
     const explCamera = camera || defaultCamera;
 
-    const explDomElement = (domElement ||
-      events.connected ||
-      gl.domElement) as HTMLElement;
+    const explDomElement = (domElement || gl.domElement) as HTMLElement;
 
     const marker = React.useMemo(
       () =>
         new MarkerImpl(
           explCamera,
           explDomElement,
-          props.minRingRadius || 1.0,
-          props.ringSize || 0.5,
-          props.arrowRadius || 0.3,
-          props.arrowLength || 1.0
+          minRingRadius,
+          ringSize,
+          arrowRadius,
+          arrowLength
         ),
       [
         explCamera,
         explDomElement,
-        props.minRingRadius,
-        props.ringSize,
-        props.arrowRadius,
-        props.arrowLength,
+        minRingRadius,
+        ringSize,
+        arrowRadius,
+        arrowLength,
       ]
     );
 
@@ -454,7 +463,6 @@ const Marker = React.forwardRef<MarkerImpl, MarkerProps>(
       if (object) {
         marker.link(object instanceof THREE.Object3D ? object : object.current);
       } else if (group.current instanceof THREE.Object3D) {
-        console.log(group.current);
         marker.link(group.current);
       }
     }, [marker, object]);
@@ -473,9 +481,15 @@ const Marker = React.forwardRef<MarkerImpl, MarkerProps>(
       }
     }, [onDragStart, onDragStop, marker]);
 
+    // Render a marker and, immediately after, a group containing all children.
     return marker ? (
       <>
-        <primitive ref={ref} dispose={undefined} object={marker} />
+        <primitive
+          ref={ref}
+          dispose={undefined}
+          object={marker}
+          {...markerProps}
+        />
         <group ref={group}>{children}</group>
       </>
     ) : null;

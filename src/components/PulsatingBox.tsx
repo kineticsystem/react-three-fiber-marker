@@ -11,7 +11,7 @@ const Sphere = (props: JSX.IntrinsicElements["mesh"]) => {
   });
   return (
     <mesh {...props} ref={ref}>
-      <sphereBufferGeometry args={[0.3, 24, 24]} />
+      <boxGeometry args={[1, 1, 1]} />
       <meshStandardMaterial color={"yellow"} />
     </mesh>
   );
