@@ -23,6 +23,7 @@ function App() {
       <gridHelper args={[6, 10, 0x3a3a3a, 0x3a3a3a]} />
       <OrbitControls enabled={orbitEnabled} dampingFactor={1} />
       <Marker
+        enabled={true} // Default is true.
         position={[0, 1.2, 0]}
         minRingRadius={1.0}
         ringSize={0.3}

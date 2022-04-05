@@ -34,6 +34,13 @@ import * as FreeformControls from "@kineticsystem/three-freeform-controls";
  * this.scene.add(marker);
  */
 export class MarkerImpl extends FreeformControls.ControlsManager {
+  private xTranslation?: TranslationGroup;
+  private yTranslation?: TranslationGroup;
+  private zTranslation?: TranslationGroup;
+  private xRotation?: RotationGroup;
+  private yRotation?: RotationGroup;
+  private zRotation?: RotationGroup;
+
   constructor(
     camera: THREE.Camera,
     domElement: HTMLElement,
@@ -45,6 +52,15 @@ export class MarkerImpl extends FreeformControls.ControlsManager {
     super(camera, domElement);
   }
 
+  public setEnabled = (enabled: boolean) => {
+    this.xTranslation?.setEnabled(enabled);
+    this.yTranslation?.setEnabled(enabled);
+    this.zTranslation?.setEnabled(enabled);
+    this.xRotation?.setEnabled(enabled);
+    this.yRotation?.setEnabled(enabled);
+    this.zRotation?.setEnabled(enabled);
+  };
+
   public link = (object: THREE.Object3D): THREE.Group => {
     const controls = this.anchor(object, {
       hideOtherHandlesOnDrag: true,
@@ -55,17 +71,35 @@ export class MarkerImpl extends FreeformControls.ControlsManager {
 
     controls.showAll(false);
     controls.setupHandle(
-      new XTranslation(this.minRingRadius, this.arrowRadius, this.arrowLength)
+      (this.xTranslation = new XTranslation(
+        this.minRingRadius,
+        this.arrowRadius,
+        this.arrowLength
+      ))
     );
     controls.setupHandle(
-      new YTranslation(this.minRingRadius, this.arrowRadius, this.arrowLength)
+      (this.yTranslation = new YTranslation(
+        this.minRingRadius,
+        this.arrowRadius,
+        this.arrowLength
+      ))
     );
     controls.setupHandle(
-      new ZTranslation(this.minRingRadius, this.arrowRadius, this.arrowLength)
+      (this.zTranslation = new ZTranslation(
+        this.minRingRadius,
+        this.arrowRadius,
+        this.arrowLength
+      ))
     );
-    controls.setupHandle(new XRotation(this.minRingRadius, this.ringSize));
-    controls.setupHandle(new YRotation(this.minRingRadius, this.ringSize));
-    controls.setupHandle(new ZRotation(this.minRingRadius, this.ringSize));
+    controls.setupHandle(
+      (this.xRotation = new XRotation(this.minRingRadius, this.ringSize))
+    );
+    controls.setupHandle(
+      (this.yRotation = new YRotation(this.minRingRadius, this.ringSize))
+    );
+    controls.setupHandle(
+      (this.zRotation = new ZRotation(this.minRingRadius, this.ringSize))
+    );
 
     return controls;
   };
@@ -148,11 +182,32 @@ class ArrowFactory {
   };
 }
 
+abstract class RotationGroup extends FreeformControls.RotationGroup {
+  protected enabled = true;
+  setColor(color: string): void {
+    throw new Error("Method not implemented.");
+  }
+  public setEnabled = (enabled: boolean) => {
+    this.enabled = enabled;
+  };
+}
+
+abstract class TranslationGroup extends FreeformControls.TranslationGroup {
+  protected enabled = true;
+  setColor(color: string): void {
+    throw new Error("Method not implemented.");
+  }
+  public setEnabled = (enabled: boolean) => {
+    this.enabled = enabled;
+  };
+}
+
 /**
  * Handler to rotate the marker around the X axis.
  */
-class XRotation extends FreeformControls.RotationGroup {
+class XRotation extends RotationGroup {
   private meshes: THREE.Mesh[];
+
   constructor(private minRingRadius: number, private ringSize: number) {
     super();
     this.up = new THREE.Vector3(1, 0, 0);
@@ -169,19 +224,19 @@ class XRotation extends FreeformControls.RotationGroup {
     this.add(...ring);
   }
 
-  setColor(color: string): void {
-    throw new Error("Method not implemented.");
-  }
-
   getInteractiveObjects = (): THREE.Mesh[] => {
-    return [...this.meshes];
+    if (this.enabled) {
+      return [...this.meshes];
+    } else {
+      return [];
+    }
   };
 }
 
 /**
  * Handler to rotate the marker around the Y axis.
  */
-class YRotation extends FreeformControls.RotationGroup {
+class YRotation extends RotationGroup {
   private meshes: THREE.Mesh[];
   constructor(private minRingRadius: number, private ringSize: number) {
     super();
@@ -199,19 +254,19 @@ class YRotation extends FreeformControls.RotationGroup {
     this.add(...ring);
   }
 
-  setColor(color: string): void {
-    throw new Error("Method not implemented.");
-  }
-
   getInteractiveObjects = (): THREE.Mesh[] => {
-    return [...this.meshes];
+    if (this.enabled) {
+      return [...this.meshes];
+    } else {
+      return [];
+    }
   };
 }
 
 /**
  * Handler to rotate the marker around the Z axis.
  */
-class ZRotation extends FreeformControls.RotationGroup {
+class ZRotation extends RotationGroup {
   private meshes: THREE.Mesh[];
   constructor(private minRingRadius: number, private ringSize: number) {
     super();
@@ -226,19 +281,19 @@ class ZRotation extends FreeformControls.RotationGroup {
     this.add(...ring);
   }
 
-  setColor(color: string): void {
-    throw new Error("Method not implemented.");
-  }
-
   getInteractiveObjects = (): THREE.Mesh[] => {
-    return [...this.meshes];
+    if (this.enabled) {
+      return [...this.meshes];
+    } else {
+      return [];
+    }
   };
 }
 
 /**
  * Handler to translate the marker along the X axis.
  */
-class XTranslation extends FreeformControls.TranslationGroup {
+class XTranslation extends TranslationGroup {
   parallel: THREE.Vector3;
   private meshes: THREE.Mesh[];
   constructor(
@@ -278,19 +333,19 @@ class XTranslation extends FreeformControls.TranslationGroup {
     this.add(...negativeArrow);
   }
 
-  setColor(color: string): void {
-    throw new Error("Method not implemented.");
-  }
-
   getInteractiveObjects = (): THREE.Mesh[] => {
-    return [...this.meshes];
+    if (this.enabled) {
+      return [...this.meshes];
+    } else {
+      return [];
+    }
   };
 }
 
 /**
  * Handler to translate the marker along the Y axis.
  */
-class YTranslation extends FreeformControls.TranslationGroup {
+class YTranslation extends TranslationGroup {
   parallel: THREE.Vector3;
   private meshes: THREE.Mesh[];
   constructor(
@@ -329,19 +384,19 @@ class YTranslation extends FreeformControls.TranslationGroup {
     this.add(...negativeArrow);
   }
 
-  setColor(color: string): void {
-    throw new Error("Method not implemented.");
-  }
-
   getInteractiveObjects = (): THREE.Mesh[] => {
-    return [...this.meshes];
+    if (this.enabled) {
+      return [...this.meshes];
+    } else {
+      return [];
+    }
   };
 }
 
 /**
  * Handler to translate the marker along the Z axis.
  */
-class ZTranslation extends FreeformControls.TranslationGroup {
+class ZTranslation extends TranslationGroup {
   parallel: THREE.Vector3;
   private meshes: THREE.Mesh[];
   constructor(
@@ -381,12 +436,12 @@ class ZTranslation extends FreeformControls.TranslationGroup {
     this.add(...negativeArrow);
   }
 
-  setColor(color: string): void {
-    throw new Error("Method not implemented.");
-  }
-
   getInteractiveObjects = (): THREE.Mesh[] => {
-    return [...this.meshes];
+    if (this.enabled) {
+      return [...this.meshes];
+    } else {
+      return [];
+    }
   };
 }
 
@@ -408,6 +463,7 @@ export type MarkerProps = ReactThreeFiber.Object3DNode<
     camera?: THREE.Camera;
     object?: THREE.Object3D | React.MutableRefObject<THREE.Object3D>;
     domElement?: HTMLElement;
+    enabled?: boolean;
     minRingRadius?: number;
     ringSize?: number;
     arrowRadius?: number;
@@ -424,6 +480,7 @@ const Marker = React.forwardRef<MarkerImpl, MarkerProps>(
   (props: MarkerProps, ref) => {
     const {
       visible = true,
+      enabled = true,
       object,
       children,
       minRingRadius = 1.0,
@@ -466,10 +523,12 @@ const Marker = React.forwardRef<MarkerImpl, MarkerProps>(
     React.useLayoutEffect(() => {
       if (object) {
         marker.link(object instanceof THREE.Object3D ? object : object.current);
+        marker.setEnabled(enabled);
       } else if (group.current instanceof THREE.Object3D) {
         marker.link(group.current);
+        marker.setEnabled(enabled);
       }
-    }, [marker, object]);
+    }, [marker, object, enabled]);
 
     // Called when a drag operation starts or stops.
     React.useEffect(() => {
