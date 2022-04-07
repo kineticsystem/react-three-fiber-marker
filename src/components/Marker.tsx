@@ -532,16 +532,18 @@ const Marker = React.forwardRef<MarkerImpl, MarkerProps>(
 
     // Called when a drag operation starts or stops.
     React.useEffect(() => {
-      if (onDragStart) {
-        marker.listen(FreeformControls.EVENTS.DRAG_START, () => {
-          onDragStart();
-        });
-      }
-      if (onDragStop) {
-        marker.listen(FreeformControls.EVENTS.DRAG_STOP, () => {
-          onDragStop();
-        });
-      }
+      const dragStartHandler = () => onDragStart?.();
+      const dragStopHandler = () => onDragStop?.();
+      marker.listen(FreeformControls.EVENTS.DRAG_START, dragStartHandler);
+      marker.listen(FreeformControls.EVENTS.DRAG_STOP, dragStopHandler);
+
+      return () => {
+        marker.removeListen(
+          FreeformControls.EVENTS.DRAG_START,
+          dragStartHandler
+        );
+        marker.removeListen(FreeformControls.EVENTS.DRAG_STOP, dragStopHandler);
+      };
     }, [onDragStart, onDragStop, marker]);
 
     // Render a marker and, immediately after, a group containing all children.

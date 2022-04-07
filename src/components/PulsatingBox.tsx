@@ -1,7 +1,7 @@
 import React, { useRef, useState } from "react";
 import { useFrame, RootState } from "@react-three/fiber";
 
-const Sphere = (props: JSX.IntrinsicElements["mesh"]) => {
+const PulsatingBox = (props: JSX.IntrinsicElements["mesh"]) => {
   const ref = useRef<THREE.Mesh>(null!);
   const [angle, setAngle] = useState(0.0);
   useFrame((state: RootState, delta: number) => {
@@ -17,4 +17,4 @@ const Sphere = (props: JSX.IntrinsicElements["mesh"]) => {
   );
 };
 
-export default Sphere;
+export default PulsatingBox;
